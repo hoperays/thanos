@@ -13,12 +13,9 @@ arch = $(shell uname -m)
 # just visit https://quay.io/repository/prometheus/busybox?tag=latest&tab=tags.
 # TODO(bwplotka): Pinning is important but somehow quay kills the old images, so make sure to update regularly (dependabot?)
 # Update at 2020.2.01
-ifeq ($(arch), x86_64)
-    # amd64
-    SHA="14d68ca3d69fceaa6224250c83d81d935c053fb13594c811038c461194599973"
-else ifeq ($(arch), armv8)
-    # arm64
-    SHA="4dd2d3bba195563e6cb2b286f23dc832d0fda6c6662e6de2e86df454094b44d8"
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+    # amd64 or arm64
+    SHA="a56e11cce1c09f50a71290d65733ebe976adc8654395091d5379c7f294cc891e"
 else
     echo >&2 "only support amd64 or arm64 arch" && exit 1
 endif
@@ -144,7 +141,7 @@ deps: ## Ensures fresh go.mod and go.sum.
 
 .PHONY: docker
 docker: ## Builds 'thanos' docker with no tag.
-ifeq ($(OS)_$(ARCH), linux_x86_64)
+ifeq ($(OS)_$(ARCH), $(filter $(OS)_$(ARCH), linux_x86_64 linux_aarch64))
 docker: build
 	@echo ">> copying Thanos from $(PREFIX) to ./thanos_tmp_for_docker"
 	@cp $(PREFIX)/thanos ./thanos_tmp_for_docker
