@@ -774,6 +774,17 @@ func runQuery(
 
 		api.Register(router.WithPrefix("/api/v1"), tracer, logger, ins, logMiddleware)
 
+		// Experimental federate endpoint.
+		promAdapter := query.NewPrometheus(
+			logger,
+			queryableCreator,
+			enableAutodownsampling,
+			enableQueryPartialResponse,
+			queryReplicaLabels,
+			instantDefaultMaxSourceResolution,
+		)
+		promAdapter.Register(router, tracer, ins)
+
 		srv := httpserver.New(logger, reg, comp, httpProbe,
 			httpserver.WithListen(httpBindAddr),
 			httpserver.WithGracePeriod(httpGracePeriod),
